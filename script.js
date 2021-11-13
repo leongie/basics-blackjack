@@ -66,20 +66,11 @@ var shuffleCards = function (cardDeck) {
   // Return the shuffled deck
   return cardDeck;
 };
-
 // Deck is shuffled.
 var shuffledDeck = shuffleCards(makeDeck());
 var gameMode = "dealing cards";
-//The cards are displayed to the user.The user decides whether to hit or stand, using the submit button -game mode 2to submit their choice.
-//The user's cards are analysed for winning or losing conditions.
-//The computer decides to hit or stand automatically based on game rules.
-//The game either ends or continues.
-// var playerhands = [playerCard1,playerCard2];
-// var computerhands = [computercard1,computerCard2];
-// object = {}
 var playerCard1 = {};
 var playerCard2 = {};
-var playerScore3 = { playerCard1, playerCard2 };
 var computerCard1 = {};
 var computerCard2 = {};
 var main = function (input) {
@@ -87,12 +78,8 @@ var main = function (input) {
   if (gameMode == "dealing cards") {
     computerCard1 = shuffledDeck.pop();
     computerCard2 = shuffledDeck.pop();
-    //var totalcomputerRank = [computerCard1.rank + computerCard2.rank];
-    //console.log(totalcomputerRank);
     playerCard1 = shuffledDeck.pop();
     playerCard2 = shuffledDeck.pop();
-    //var totalPlayerRank = [playerCard1.rank + playerCard2.rank];
-    //console.log(totalPlayerRank);
     var myOutputValue =
       "You Draw" +
       playerCard1.name +
@@ -119,6 +106,7 @@ var main = function (input) {
       computerCard2.suit +
       " " +
       ".";
+
     //The cards are analysed for game winning conditions, e.g. Blackjack. / gameMode = 1 ==> blackjack
     if (
       (computerCard1.rank == 1 && computerCard2.rank > 10) ||
@@ -126,76 +114,77 @@ var main = function (input) {
     ) {
       myOutputValue =
         myOutputValue + "Computer Wins with BJ,better luck next time";
-    } else if (
+    } else gameMode == "comparing scores";
+    // !!! if it's blackjack, shall we change the game mode to the last game mode to end the game immediately? no need to go through hit/stand/computer turn alr
+    if (
       (playerCard1.rank == 1 && playerCard2.rank > 10) ||
       (playerCard2.rank > 10 && playerCard1.rank == 1)
     ) {
-      myOutputValue = myOutputValue + "You won with BJ ~~ ";
-    }
+      myOutputValue = myOutputValue + "Player Wins with BJ,!!!!";
+    } else gameMode == "comparing scores";
 
-    if (playerScore < 17) {
-      gameMode = "player turn, hit or stand";
-    } else if (gameMode == "player turn, hit or stand") {
-      var playerScore = playerCard1.rank + playerCard2.rank || totalPlayerRank;
-      var playerCard3 = shuffledDeck.pop();
-      var totalPlayerRank = playerScore + playerCard3;
-      var computerScore = computerCard1.rank + computerCard2.rank;
-      var totalcomputerScore =
-        computerScore + shuffledDeck.pop() + shuffledDeck.pop();
-      if (playerCard1.rank >= 10) {
-        playerCard1.rank = 10;
-      }
-      if (playerCard2.rank >= 10) {
-        playerCard2.rank = 10;
-      }
-      myOutputValue =
-        myOutputValue +
-        "do you want to hit or stand?" +
-        "\n" +
-        "Input r to draw a card, stand to stay status quo";
-      if (input == "r") {
-        myOutputValue = totalPlayerRank;
-      } else if (input == "stand") {
-        myOutputValue = playerScore;
-      }
-      //}
-      gameMode = "computer turn";
-      //The user decides whether to hit or stand, using the submit button -game mode 2to submit their choice.
+    gameMode = "player turn, hit or stand";
+    // !!! removed duplicate of blackjack check
+  } else if (gameMode == "player turn, hit or stand") {
+    if (playerCard1.rank > 10) {
+      playerCard1.rank = 10;
     }
-    if (gameMode == "computer turn") {
-      if (playerCard1.rank >= 10) playerCard1.rank = 10;
-    }
-    if (playerCard2.rank >= 10) {
+    if (playerCard2.rank > 10) {
       playerCard2.rank = 10;
     }
-    if (computerCard1.rank >= 10) {
+    if (computerCard1.rank > 10) {
       computerCard1.rank = 10;
     }
-    if (computerCard2.rank >= 10) {
+    if (computerCard2.rank > 10) {
       computerCard2.rank = 10;
     }
-    if (computerScore > 17) {
-      myoutputvalue = totalcomputerScore;
+    var playerScore = playerCard1.rank + playerCard2.rank;
+    var computerScore = computerCard1.rank + computerCard2.rank;
+    var myOutputValue = "Value on hand is" + playerScore;
+    // !!! removed third card logic for simplicity
+    //The user decides whether to hit or stand, using the submit button -game mode 2to submit their choice.
+    // !!! removed blackjack check - we only need to do this once (after dealing)
+    // !!! shifted this block of code up - remember that we need to amend the rank BEFORE we calculate the score, if not the score will not be correct for J Q K
+    gameMode = "comparing scores";
+  } else if ((gameMode = "comparing scores")) {
+    var playerScore = playerCard1.rank + playerCard2.rank;
+    var computerScore = computerCard1.rank + computerCard2.rank;
+    // !!! removed blackjack check - we only need to do this once
+    var myOutputValue = "you have";
+    if (playerCard1.rank > 10) {
+      playerCard1.rank = 10;
     }
+    if (playerCard2.rank > 10) {
+      playerCard2.rank = 10;
+    }
+    var playerScore = playerCard1.rank + playerCard2.rank;
+    // !!! removed third card logic
+    if (computerCard1.rank > 10) {
+      computerCard1.rank = 10;
+    }
+    if (computerCard2.rank > 10) {
+      computerCard2.rank = 10;
+    }
+    // !!! removed third card logic
     console.log("playerCard");
     console.log(playerCard1.rank, playerCard2.rank);
-    console.log("computercard");
+    console.log("computerCard");
     console.log(computerCard1.rank, computerCard2.rank);
     console.log("scores");
-    console.log(playerScore, computerScore);
-
-    if ((playerScore || totalPlayerRank < 21) > computerScore) {
+    var myOutputValue =
+      "Your score is: " +
+      playerScore +
+      ", computer score is: " +
+      computerScore +
+      "<br>";
+    if (playerScore > computerScore) {
       myOutputValue = myOutputValue + "Player wins!";
-    } else if (
-      (playerScore || totalPlayerRank < 21) <
-      (computerScore || computerScore < 21)
-    ) {
-      myOutputValue = myOutputValue + "Computer wins.";
+    } else if (computerScore > playerScore) {
+      myOutputValue = "Computer wins.";
     } else {
-      myOutputValue = myOutputValue + "it's a tie";
+      myOutputValue = "It's a tie.";
     }
-    //The computer decides to hit or stand automatically based on game rules.
-    //compare computer and player & o/p results
-    return myOutputValue;
+    // !!! tidied curly brackets
   }
+  return myOutputValue;
 };
